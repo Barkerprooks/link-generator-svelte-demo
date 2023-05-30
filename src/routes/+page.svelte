@@ -4,35 +4,35 @@
 
 	const path = "http://localhost:8080/iframe";
 	let amount = 0.01; // amount for the iframe to charge
-	let text = "Click a button to generate a link";
+	let text = "";
 	let url = "/";
+
+	const setAmount = () => settings.amount = amount;
+	const setText = () => text = `Click here to charge $${amount.toFixed(2)}`;
 
 	const encodeSettings = () => { // we can do this in one line, but seperating for clarity
 		const jsonString = JSON.stringify(settings);
 		const urlEncoded = encodeURIComponent(jsonString); // the compiler should optimize anyway
-		return `${path}/${btoa(urlEncoded)}`; // build the URL with base64 encoded data
+		return `${path}/?params=${btoa(urlEncoded)}`; // build the URL with base64 encoded data
 	};
 
 	const generateActualURL = () => {
-		settings.amount = amount;
-		text = `Visit page to charge $${amount}`;
+		setAmount();
+		setText();
 		url = encodeSettings();
 	};
 
 	const generateRandomURL = () => {
-		const dollars = Math.round(Math.random() * 10000000);
-		const cents = Math.round(Math.random() * 100);
-		settings.amount = (dollars + (cents / 100)); // max $10,000.00
-		text = `Visit page to charge $${randomAmount.toFixed()}`;
-		url = encodeSettings();
+		amount = parseFloat((Math.random() * 1000).toFixed(2));
+		generateActualURL();
 	}
 
 </script>
 
 <div id="card">
-	<a href={url}>{text}</a>
+	<a id="link-output" href={url} target="_blank">{text}</a>
 	<div>
-		<span id="price-input-label">iframe will charge: $</span>
+		<span>iframe will charge: $</span>
 		<input id="price-input" type="number" bind:value={amount} step="0.01" />
 	</div>
 	<div id="buttons">
@@ -44,18 +44,20 @@
 <style>
 	#price-input {
 		margin: 20px 0;
-		width: 50px;
-	}
-	#price-input-label {
-		width: min-content;
+		width: 100px;
 	}
 	#link-output {
 		hyphens: auto;
+		text-decoration: none;
 		font-weight: bolder;
 		width: 95%;
 		height: 100px;
 		text-align: center;
 		color: orangered;
+		transition: 0.2s;
+	}
+	#link-output:hover {
+		color: orange;
 	}
 	#card {
 		font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
@@ -75,6 +77,7 @@
 		color: darkorange;
 		border: 1px solid orangered;
 		cursor: pointer;
+		transition: 0.2s;
 	}
 	button:hover {
 		background-color: orangered;
