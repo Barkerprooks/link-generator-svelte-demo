@@ -2,17 +2,16 @@
 
 	import settings from "../etc/settings.json";
 
-	const path: string = "https://localhost:8080/iframe";
-
+	let host: string = "localhost:8080";
 	let copied: boolean = false;
 	let amount: number = 0.01; // amount for the iframe to charge
-	let url: string = path;
+	let url: string = `https://${host}/iframe`;
 
 	// Process the settings into a usable URL
 	const encodeSettings = () => { // we can do this in one line, but seperating for clarity
 		const jsonString = JSON.stringify(settings);
 		const urlEncoded = encodeURIComponent(jsonString); // the compiler should optimize anyway
-		return `${path}/?params=${btoa(urlEncoded)}`; // build the URL with base64 encoded data
+		return `https://${host}/iframe/?params=${btoa(urlEncoded)}`; // build the URL with base64 encoded data
 	};
 
 	// URL FUNCTIONS
@@ -33,6 +32,8 @@
 
 	// BUTTON FUNCTIONS
 	// mapped button function for the input value
+	const setURLHost = () => url = `https://${host}/iframe`;
+
 	const generateActualURL = () => {
 		settings.amount = amount;
 		url = encodeSettings();
@@ -49,13 +50,19 @@
 <div id="card">
 	<div>
 		<a id="link-output" href={url} target="_blank" style={`color: ${copied ? "orangered" : "black"}`}>{wrapURL(url, 64)}</a>
-		{#if url !== path}
+		{#if url !== `https://${host}/iframe`}
 			<button on:click={copyUrl}>{copied ? "Copied!" : "Copy Link"}</button>			
 		{/if}
 	</div>
-	<div>
-		<span>Charge: $</span>
-		<input id="price-input" type="number" bind:value={amount} step="0.01" />
+	<div id="input-group">
+		<div>
+			<span>connect to host:</span>
+			<input id="host-input" bind:value={host} on:input={setURLHost}/>
+		</div>
+		<div>
+			<span>charge $</span>
+			<input id="price-input" type="number" bind:value={amount} step="0.01" />
+		</div>
 	</div>
 	<div id="buttons">
 		<button on:click={generateActualURL}>Generate Test Payment Link</button>
@@ -64,13 +71,10 @@
 </div>
 
 <style>
-	:global(html) {
-		height: 100vh;
-		background: linear-gradient(white, 80%,grey);
-	}
-	#price-input {
+	#input-group {
+		display: flex;
+		justify-content: space-around;
 		margin: 50px 0;
-		width: 100px;
 	}
 	#link-output {
 		display: block;
@@ -85,7 +89,6 @@
 		text-decoration: underline;
 	}
 	#card {
-		font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
 		background-color: white;
 		width: 50%;
 		margin: 10% auto;
